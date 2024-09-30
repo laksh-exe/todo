@@ -8,6 +8,7 @@ in the isar database
 */
 
 import 'package:isar/isar.dart';
+import 'package:todo/data/models/isar_todo.dart';
 import 'package:todo/domain/models/todo.dart';
 import 'package:todo/domain/repository/todo.dart';
 
@@ -16,26 +17,31 @@ class IsarTodoRepo implements TodoRepo {
   IsarTodoRepo(this.db);
 
   @override
-  Future<List<Todo>> getTodos() {
-    // TODO: implement getTodos
-    throw UnimplementedError();
+  Future<List<Todo>> getTodos() async {
+    // fetch
+    final todos = await db.todoIsars.where().findAll();
+    // convert to normal todo object
+    return todos.map((todoIsar) => todoIsar.toDomain()).toList();
   }
 
   @override
-  Future<void> updateTodo(Todo todo) {
-    // TODO: implement updateTodo
-    throw UnimplementedError();
+  Future<void> updateTodo(Todo todo) async {
+    // convert to isar
+    final todoIsar = TodoIsar.fromDomain(todo);
+
+    return db.writeTxn(() => db.todoIsars.put(todoIsar));
   }
 
   @override
-  Future<void> addTodo() {
-    // TODO: implement addTodo
-    throw UnimplementedError();
+  Future<void> addTodo(Todo newTodo) async {
+    // convert to isar
+    final todoIsar = TodoIsar.fromDomain(newTodo);
+
+    return db.writeTxn(() => db.todoIsars.put(todoIsar));
   }
 
   @override
-  Future<void> deleteTodo(Todo todo) {
-    // TODO: implement deleteTodo
-    throw UnimplementedError();
+  Future<void> deleteTodo(Todo todo) async {
+    await db.writeTxn(() => db.todoIsars.delete(todo.id));
   }
 }
